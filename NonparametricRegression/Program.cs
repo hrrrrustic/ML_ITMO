@@ -42,7 +42,7 @@ namespace NonparametricRegression
             
             foreach (RegressionToClassificationFunction function in RegressionToClassificationsFunctions)
             {
-                BestParams result = BestParamsFinder<EcoliVectorData>.FindBestParams(dataRows, function, maxDistances);
+                (KernelFunction, DistanceFunction, BestWindow) result = BestParamsFinder<EcoliVectorData>.FindBestParams(dataSet, function, maxDistances);
                 Console.WriteLine(result);
             }
         }
