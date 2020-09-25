@@ -5,6 +5,11 @@ using static System.Math;
 
 namespace NonparametricRegression.Helpers
 {
+    public delegate Double DistanceFunction(Double[] vector1, Double[] vector2);
+
+    public delegate Double KernelFunction(Double distance);
+
+    public delegate Int32 RegressionToClassificationFunction(Dictionary<Int32, Double> labelValues);
     public static class Functions
     {
         public static readonly DistanceFunction[] DistanceFunctions = {EuclideanDistance, ManhattanDistance, ChebyshevDistance};

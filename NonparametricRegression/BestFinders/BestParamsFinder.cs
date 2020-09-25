@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NonparametricRegression.Helpers;
 using static NonparametricRegression.Helpers.Functions;
+
 namespace NonparametricRegression.BestFinders
 {
     public static class BestParamsFinder<T> where T : IDataSetObject
@@ -15,12 +16,9 @@ namespace NonparametricRegression.BestFinders
                 .OrderByDescending(k => k.BestDistance)
                 .First();
 
-            BestDistance FindBestDistance(KernelFunction kernel) => BestDistanceFinder<T>.FindBestDistanceFunction(dataRows, kernel, maxDistances, converter);
+            BestDistance FindBestDistance(KernelFunction kernel) => FindBestDistanceFunction(dataRows, kernel, maxDistances, converter);
         }
-    }
 
-    public static class BestDistanceFinder<T> where T : IDataSetObject
-    {
         public static BestDistance FindBestDistanceFunction(List<T> dataRows, KernelFunction kernel, Dictionary<DistanceFunction, Double> maxDistances, RegressionToClassificationFunction converter)
         {
             return DistanceFunctions
@@ -28,15 +26,12 @@ namespace NonparametricRegression.BestFinders
                 .Select(k => new BestDistance(FindBestWindow(k), k))
                 .OrderByDescending(k => k.BestWindow)
                 .First();
-
-            BestWindow FindBestWindow(DistanceFunction distance) => 
-                BestWindowFinder<T>.FindBestWindow(new FunctionContainer(distance, kernel, converter), dataRows, maxDistances[distance]);
+            
+            BestWindow FindBestWindow(DistanceFunction distance) 
+                => FindBestWindowType(new FunctionContainer(distance, kernel, converter), dataRows, maxDistances[distance]);
         }
-    }
 
-    public static class BestWindowFinder<T> where T : IDataSetObject
-    {
-        public static BestWindow FindBestWindow(FunctionContainer functionContainer, List<T> dataRows, Double maxDistance)
+        public static BestWindow FindBestWindowType(FunctionContainer functionContainer, List<T> dataRows, Double maxDistance)
         {
             (Double maxMicro, Double maxMacro, Window bestWindow) = (Double.MinValue, Double.MinValue, null);
 
