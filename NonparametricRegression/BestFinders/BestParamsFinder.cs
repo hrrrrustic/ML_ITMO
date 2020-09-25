@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using NonparametricRegression.Helpers;
-
+using static NonparametricRegression.Helpers.Functions;
 namespace NonparametricRegression.BestFinders
 {
     public static class BestParamsFinder<T> where T : IDataSetObject
     {
         public static BestParams FindBestParams(List<T> dataRows, RegressionToClassificationFunction converter, Dictionary<DistanceFunction, Double> maxDistances)
         {
-            return Functions
-                .KernelFunctions
+            return KernelFunctions
                 .AsParallel()
                 .Select(k => new BestParams(FindBestDistance(k), k))
                 .OrderByDescending(k => k.BestDistance)
@@ -24,8 +23,7 @@ namespace NonparametricRegression.BestFinders
     {
         public static BestDistance FindBestDistanceFunction(List<T> dataRows, KernelFunction kernel, Dictionary<DistanceFunction, Double> maxDistances, RegressionToClassificationFunction converter)
         {
-            return Functions
-                .DistanceFunctions
+            return DistanceFunctions
                 .AsParallel()
                 .Select(k => new BestDistance(FindBestWindow(k), k))
                 .OrderByDescending(k => k.BestWindow)

@@ -58,15 +58,13 @@ namespace NonparametricRegression
 
         private Double F1Score(Double beta, Int32 classIndex)
         {
-            Double prec = Precision(classIndex);
-            Double rec = Recall(classIndex);
+            (Double prec, Double rec) = (Precision(classIndex), Recall(classIndex));
             return 2 * prec * rec / (beta * beta * prec + rec).SafeValue();
         }
 
         public Double MacroF1Score(Double beta)
         {
-            Double prec = PrecisionW();
-            Double rec = RecallW();
+            (Double prec, Double rec) = (PrecisionW(), RecallW());
             return ((1 + beta * beta) * prec * rec / (beta * beta * prec + rec)).SafeValue();
         }
 
