@@ -6,6 +6,7 @@ using NonparametricRegression.BestFinders;
 using NonparametricRegression.Data;
 using NonparametricRegression.Helpers;
 using static NonparametricRegression.Helpers.Functions;
+
 namespace NonparametricRegression
 {
     public class Program
@@ -38,7 +39,7 @@ namespace NonparametricRegression
             Dictionary<DistanceFunction, Double> maxDistances = DistanceFunctions
                 .ToDictionary(k => k, 
                     e => dataSet.GetMaxDistanceFromDataSet(e));
-
+            
             foreach (RegressionToClassificationFunction function in RegressionToClassificationsFunctions)
             {
                 BestParams result = BestParamsFinder<EcoliVectorData>.FindBestParams(dataRows, function, maxDistances);
@@ -57,7 +58,9 @@ namespace NonparametricRegression
             FunctionContainer container)
             where T : IDataSetObject => 
             Enumerable
-            .Range(0, dataSet.Count)
+            .Range(0, dataSet.Count - 1)
+            .AsParallel()
+            .AsOrdered()
             .Select(k => 
                 (k, dataSet.GetConfusionMatrix(container, new Window(k))))
             .ToList();
