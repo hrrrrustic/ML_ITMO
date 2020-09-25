@@ -9,7 +9,7 @@ namespace MLCodeForces
     {
         static void Main(string[] args)
         {
-            TaskC.Solve();
+            NonparametricRegression.Program.RunBestFinder();
         }
     }
 }

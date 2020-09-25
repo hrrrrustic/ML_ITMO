@@ -35,13 +35,13 @@ namespace NonparametricRegression
 
             var dataSet = new DataSet<EcoliVectorData>(dataRows);
 
-            var maxDistances = new Dictionary<DistanceFunction, Double>();
-            foreach (var distanceFunction in DistanceFunctions)
-                maxDistances.Add(distanceFunction, dataSet.GetMaxDistanceFromDataSet(distanceFunction));
+            Dictionary<DistanceFunction, Double> maxDistances = DistanceFunctions
+                .ToDictionary(k => k, 
+                    e => dataSet.GetMaxDistanceFromDataSet(e));
 
             foreach (RegressionToClassificationFunction function in RegressionToClassificationsFunctions)
             {
-                BestParams result = BestParamsFinder<EcoliVectorData>.FindBestParams(dataRows, classes.Length, function, maxDistances);
+                BestParams result = BestParamsFinder<EcoliVectorData>.FindBestParams(dataRows, function, maxDistances);
                 Console.WriteLine(result);
             }
         }
@@ -59,7 +59,7 @@ namespace NonparametricRegression
             Enumerable
             .Range(0, dataSet.Count)
             .Select(k => 
-                (k, dataSet.GetConfusionMatrix(container.DistanceFunction, container.KernelFunction, container.ConverterFunction, new Window(k))))
+                (k, dataSet.GetConfusionMatrix(container, new Window(k))))
             .ToList();
     }
 }

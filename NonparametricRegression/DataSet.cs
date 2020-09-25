@@ -28,15 +28,15 @@ namespace NonparametricRegression
 
         private Double MinMax(Double min, Double max, Double current) => Math.Abs((current - min) / (max - min));
 
-        public ConfusionMatrix GetConfusionMatrix(DistanceFunction distance, KernelFunction kernel, RegressionToClassificationFunction converter, Window window)
+        public ConfusionMatrix GetConfusionMatrix(FunctionContainer container, Window window)
         {
             Int32 classCount = _dataSet.Select(k => k.Label).Distinct().Count();
             Int32[,] matrix = new Int32[classCount, classCount];
 
             for (Int32 i = 0; i < _dataSet.Count; i++)
             {
-                Dictionary<Int32, Double> result = LeaveOneOutStep(distance, kernel, window, i);
-                (Int32 predict, Int32 actual) = (converter.Invoke(result), _dataSet[i].Label);
+                Dictionary<Int32, Double> result = LeaveOneOutStep(container.DistanceFunction, container.KernelFunction, window, i);
+                (Int32 predict, Int32 actual) = (container.ConverterFunction.Invoke(result), _dataSet[i].Label);
                 matrix[actual, predict]++;
             }
 
