@@ -8,15 +8,15 @@ namespace NonparametricRegression.Helpers
     {
         private readonly Double _fixedWindow;
         private readonly Int32 _variableWindow;
-        private readonly Boolean _isFixed;
+        public readonly Boolean IsFixed;
 
-        public Window(Double fixedWindow) => (_fixedWindow, _isFixed) = (fixedWindow, true);
+        public Window(Double fixedWindow) => (_fixedWindow, IsFixed) = (fixedWindow, true);
 
-        public Window(Int32 variableWindow) => (_variableWindow, _isFixed) = (variableWindow, false);
+        public Window(Int32 variableWindow) => (_variableWindow, IsFixed) = (variableWindow, false);
 
-        public Double GetFixedWindow<T>(List<(Double Distance, T Value)> orderedValues) where T : IDataSetObject
+        public Double GetFixedWindow<T>(List<(Double Distance, T Value)> orderedValues) where T : DataSetObject
         {
-            if (_isFixed)
+            if (IsFixed)
                 return _fixedWindow;
 
             return orderedValues.ElementAt(_variableWindow).Distance;
@@ -24,7 +24,7 @@ namespace NonparametricRegression.Helpers
 
         public override String ToString()
         {
-            if (_isFixed)
+            if (IsFixed)
                 return _fixedWindow + " window";
 
             return _variableWindow + " neighbors";

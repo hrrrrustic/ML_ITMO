@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using static System.Math;
 
@@ -9,7 +8,6 @@ namespace NonparametricRegression.Helpers
 
     public delegate Double KernelFunction(Double distance);
 
-    public delegate Int32 RegressionToClassificationFunction(Dictionary<Int32, Double> labelValues);
     public static class Functions
     {
         public static readonly DistanceFunction[] DistanceFunctions = {EuclideanDistance, ManhattanDistance, ChebyshevDistance};
@@ -34,6 +32,8 @@ namespace NonparametricRegression.Helpers
                 .SafeValue();
 
         public static KernelFunction[] KernelFunctions = { Uniform, Triangular, Epanechnikov, Quartic, Triweight, Tricube, Gaussian, Cosine, Logistic, Sigmoid };
+        public static KernelFunction[] KernelFunctionsWithDistanceLimitations = { Uniform, Triangular, Epanechnikov, Quartic, Triweight, Tricube, Cosine };
+
         public static Double Uniform(Double distance) => distance >= 1 ? 0 : 0.5;
         public static Double Triangular(Double distance) => distance >= 1 ? 0 : 1 - Abs(distance);
         public static Double Epanechnikov(Double distance) => distance >= 1 ? 0 : 0.75 * (1 - Pow(distance, 2));
@@ -44,22 +44,5 @@ namespace NonparametricRegression.Helpers
         public static Double Cosine(Double distance) => distance >= 1 ? 0 : 0.25 * PI * Cos(PI * distance * 0.5);
         public static Double Logistic(Double distance) => 1 / (Pow(E, distance) + 2 + Pow(E, -distance));
         public static Double Sigmoid(Double distance) => 2 / (PI * (Pow(E, distance) + Pow(E, -distance)));
-
-        public static RegressionToClassificationFunction[] RegressionToClassificationsFunctions = { SimpleRound, OneHot };
-
-        public static Int32 SimpleRound(Dictionary<Int32, Double> labelValues)
-        {
-            Double distanceSum = labelValues.Sum(k => k.Value);
-            var result = labelValues.Keys.Sum(k => k * labelValues[k]) / distanceSum;
-            Int32 classificationResult = (Int32)Math.Round(result.SafeValue());
-
-            return classificationResult;
-        }
-
-        public static Int32 OneHot(Dictionary<Int32, Double> labelValues)
-            => labelValues
-                .OrderByDescending(k => k.Value)
-                .First()
-                .Key;
     }
 }

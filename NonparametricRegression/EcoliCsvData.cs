@@ -1,7 +1,8 @@
 ﻿using System;
 using Microsoft.ML.Data;
+using NonparametricRegression.Helpers;
 
-namespace NonparametricRegression.Data
+namespace NonparametricRegression
 {
     public class EcoliCsvData
     {
@@ -14,10 +15,10 @@ namespace NonparametricRegression.Data
         [LoadColumn(6)] public Double alm2 { get; set; }
         [LoadColumn(7)] public Int32 Class { get; set; }
 
-        public EcoliVectorData ToVectorData()
+        public DataSetObject ToDataSetObject()
         {
             Double[] thisArray = { mcg, gvh, lip, chg, aac, alm1, alm2 };
-            return new EcoliVectorData(Class, thisArray);
+            return new DataSetObject(thisArray, Class);
         }
     }
 }
