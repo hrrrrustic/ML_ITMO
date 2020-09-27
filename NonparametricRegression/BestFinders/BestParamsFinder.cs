@@ -29,21 +29,6 @@ namespace NonparametricRegression.BestFinders
                 .First();
         }
 
-        public static (KernelFunction, DistanceFunction, BestWindow) FindBestParams2(DataSet dataSet, Dictionary<DistanceFunction, Double> maxDistances, Boolean oneHot)
-        {
-            List<(KernelFunction, DistanceFunction, BestWindow)> windows = new List<(KernelFunction, DistanceFunction, BestWindow)>();
-
-            foreach (KernelFunction kernelFunction in KernelFunctions)
-            {
-                foreach (DistanceFunction distanceFunction in DistanceFunctions)
-                {
-                    var currentWindow = FindBestWindowType(distanceFunction, kernelFunction, dataSet, maxDistances[distanceFunction], oneHot);
-                    windows.Add((kernelFunction, distanceFunction, currentWindow));
-                }
-            }
-
-            return windows.OrderByDescending(k => k.Item3).First();
-        }
         public static BestWindow FindBestWindowType(DistanceFunction distance, KernelFunction kernel, DataSet dataSet, Double maxDistance, Boolean oneHot)
         {
             (Double maxMicro, Double maxMacro, Window bestWindow) = (Double.MinValue, Double.MinValue, null);
