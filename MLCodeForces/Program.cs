@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Bayes;
-using XPlot.Plotly;
+using DecisionTrees;
 
 namespace MLCodeForces
 {
@@ -12,121 +11,88 @@ namespace MLCodeForces
     {
         static void Main(string[] args)
         {
-            string dataFolderPath = @"D:\RandomTrash\Bayes";
-            var dataPartPaths = Directory.GetDirectories(dataFolderPath);
-            List<List<Message>> dataSet = dataPartPaths
-                .Select(k => ParsePart(k, 2))
-                .ToList();
-            Graphic(dataSet);
-            int spamCount = dataSet.Select(k => k.Count(e => e.IsSpam)).Sum();
-            int normalCount = dataSet.Select(k => k.Count(e => !e.IsSpam)).Sum();
-            var confusionMatrix = CrossValidation.Validate(dataSet, 10, 0.015, 2.5, 1, out var rocData);
-            Console.WriteLine(confusionMatrix.Precision(0));
-            Console.WriteLine(confusionMatrix.Precision(1));
-            rocData = rocData.OrderBy(k => k.Item1).ToList();
-            double rightStep = (double) 1 / spamCount;
-            double upStep = (double)1 / normalCount;
-            List<double> xValues = new List<Double>{0};
-            List<double> yValues = new List<Double>{0};
-            foreach (var tuple in rocData)
-            {
-                if (tuple.Item2 == 0)
-                {
-                    xValues.Add(xValues[^1]);
-                    yValues.Add(yValues[^1] + upStep);
-                }
-                else
-                {
-                    yValues.Add(yValues[^1]);
-                    xValues.Add(xValues[^1] + rightStep);
-                }
-            }
-
-            File.WriteAllText("D:\\RandomTrash\\x.txt", String.Join(' ', xValues));
-            File.WriteAllText("D:\\RandomTrash\\y.txt", String.Join(' ', yValues));
+            Console.WriteLine("Decision Trees");
+            string path = @"D:\RandomTrash\DT\20_train.csv";
+            var dataSet = ParseFile(path);
+            var tree = DecisionTree.BuildFromDataSet(dataSet, 25);
+            var classCount = ParseFile(path.Replace("test", "train")).GroupBy(k => k.Label).Count();
+            dataSet = ParseFile(path.Replace("train", "test"));
+            var confusion = GetFScores(tree, dataSet, false, classCount, 25);
+            Console.WriteLine(confusion.Micro);
+            Console.WriteLine(confusion.Macro);
+            //GetGraphic(path, 25);
         }
 
-        private static void Graphic(List<List<Message>> dataSet)
+        private static void GetGraphic(DecisionTree tree, DataSetObject[] dataSet, int classCount, int treeHeight)
         {
             List<Double> x = new List<Double>();
             List<Double> y = new List<Double>();
-            List<Double> y2 = new List<Double>();
-            for (Double i = 1; i < 2.5; i+= 0.05)
+            for (int i = 1; i < 25; i++)
             {
-                var confusionMatrix = CrossValidation.Validate(dataSet, 10, 0.015, i, 1, out var rocData);
+                var fScores = GetFScores(tree, dataSet, false, classCount, treeHeight);
                 x.Add(i);
-                y.Add(confusionMatrix.Precision(0));
-                y2.Add(confusionMatrix.Precision(1));
+                y.Add((fScores.Micro + fScores.Macro) / 2);
             }
 
-            File.WriteAllText(@"D:\RandomTrash\Bayes\x.txt", String.Join(' ', x));
-            File.WriteAllText(@"D:\RandomTrash\Bayes\y.txt", String.Join(' ', y));
-            File.WriteAllText(@"D:\RandomTrash\Bayes\y2.txt", String.Join(' ', y2));
+        }
+        private static void TestAllFiles(string folderPath)
+        {
+            Parallel.ForEach(Directory
+                .EnumerateFiles(folderPath)
+                .Where(k => k.Contains("train")), (s, state) => TestFile(s));
         }
 
-        private static void FindBestParams(string[] dataPartPaths)
+        private static void TestFile(string filePath)
         {
-            List<Double> alphaList = new List<Double>();
-            Double alpha = 0;
-            for (int i = 0; i < 200; i++)
+            var dataSet = ParseFile(filePath);
+            var classCount = dataSet.GroupBy(k => k.Label).Count();
+            var indexFlag = dataSet.Any(k => k.Label == 0);
+            var testDataSet = ParseFile(filePath.Replace("train", "test"));
+
+            (double bestMicro, double bestMacro, int bestHeight) = (0, 0, 0);
+            var tree = DecisionTree.BuildFromDataSet(dataSet, 25);
+
+            for (int i = 1; i < 25; i++)
             {
-                alpha += 0.005;
-                alphaList.Add(alpha);
+                var fScores = GetFScores(tree, testDataSet, indexFlag, classCount, i);
+
+                if (fScores.Macro > bestMacro && fScores.Micro > bestMicro)
+                    (bestMacro, bestMicro, bestHeight) = (fScores.Macro, fScores.Micro, i);
+
+                if(bestMacro == 1 && bestMicro == 1)
+                    break;
             }
 
-            (double micro, double macro, int n, double bestAlpha) = (default, default, default, default);
-            object locker = new Object();
-
-            Parallel.For(1, 4, i =>
+            File.AppendAllText(@"D:\RandomTrash\DTLog.txt", 
+                filePath + " : " + bestMacro + " : " + bestMicro + " : " + bestHeight + " : " + Environment.NewLine);
+        }
+        private static (Double Macro, Double Micro) GetFScores(DecisionTree tree, DataSetObject[] dataSet, bool indexFlag, int classCount, int maxHeight)
+        {
+            var matrix = new Int32[classCount, classCount];
+            foreach (var item in dataSet)
             {
-                List<List<Message>> dataSet = dataPartPaths
-                    .Select(k => ParsePart(k, i))
-                    .ToList();
-
-                Parallel.ForEach(alphaList, d =>
+                var predict = tree.ClassifyObject(item, maxHeight);
+                var actual = item.Label;
+                if (!indexFlag)
                 {
-                    var confusionMatrix = CrossValidation.Validate(dataSet, 10, d, 1, 1, out _);
-                    var prec0 = confusionMatrix.MicroF1Score(1);
-                    var prec1 = confusionMatrix.MacroF1Score(1);
-
-                    lock (locker)
-                    {
-                        if (prec0 > micro && prec1 > macro)
-                        {
-                            macro = prec1;
-                            micro = prec0;
-                            n = i;
-                            bestAlpha = d;
-                        }
-                    }
-                });
-            });
-
-            Console.WriteLine("N=" + n);
-            Console.WriteLine("Alpha=" + bestAlpha);
-        }
-
-        private static List<Message> ParsePart(String partFolderPath, int n)
-        {
-            List<Message> messages = new List<Message>();
- 
-            foreach (String dataFile in Directory.EnumerateFiles(partFolderPath))
-            {
-                var data = File
-                    .ReadAllLines(dataFile)
-                    .SelectMany(k => k
-                        .Trim('\n', ' ')
-                        .Split(' '))
-                    .Where(k => !String.IsNullOrWhiteSpace(k))
-                    .Skip(1)
-                    .Select(Int32.Parse)
-                    .ToArray();
-
-                var message = new Message(data, dataFile.Contains("spmsg"), n);
-                messages.Add(message);
+                    predict--;
+                    actual--;
+                }
+                matrix[predict, actual]++;
             }
 
-            return messages;
+            var confusion = new DecisionTrees.ConfusionMatrix(matrix);
+            return (confusion.MacroF1Score(1), confusion.MicroF1Score(1));
         }
+        private static DataSetObject[] ParseFile(string path) 
+            => File
+                .ReadAllLines(path)
+                .Skip(1)
+                .Select(k => k
+                    .Split(',')
+                    .Select(Double.Parse)
+                    .ToList())
+                .Select(k => new DataSetObject(k.SkipLast(1).ToArray(), (int) k[^1]))
+                .ToArray();
     }
 }
