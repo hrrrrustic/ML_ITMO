@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bayes", "Bayes\Bayes.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DecisionTrees", "DecisionTree\DecisionTrees.csproj", "{1EBD2AEA-0C0E-429C-B21F-5B0E93F29BE6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SVM", "SVM\SVM.csproj", "{A541305D-32AC-4639-B9EE-C8F96354491F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{1EBD2AEA-0C0E-429C-B21F-5B0E93F29BE6}.Release|x64.Build.0 = Release|Any CPU
 		{1EBD2AEA-0C0E-429C-B21F-5B0E93F29BE6}.Release|x86.ActiveCfg = Release|Any CPU
 		{1EBD2AEA-0C0E-429C-B21F-5B0E93F29BE6}.Release|x86.Build.0 = Release|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Debug|x64.Build.0 = Debug|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Debug|x86.Build.0 = Debug|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Release|x64.ActiveCfg = Release|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Release|x64.Build.0 = Release|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Release|x86.ActiveCfg = Release|Any CPU
+		{A541305D-32AC-4639-B9EE-C8F96354491F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
